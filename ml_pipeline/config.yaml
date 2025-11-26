@@ -1,0 +1,64 @@
+# ML Pipeline Configuration
+
+# Data Collection
+data_sources:
+  - name: "jenkins_docs"
+    type: "documentation"
+    url: "https://www.jenkins.io/doc/"
+
+  - name: "jenkins_community"
+    type: "forum"
+    url: "https://community.jenkins.io/"
+
+  - name: "stackoverflow"
+    type: "qa"
+    url: "https://stackoverflow.com/questions/tagged/jenkins"
+    max_pages: 100
+
+# Data Preprocessing
+preprocessing:
+  max_sequence_length: 11000  # characters
+  remove_code_blocks: true
+  min_answer_length: 20
+  max_answer_length: 5000
+
+# Fine-tuning
+training:
+  base_model: "meta-llama/Llama-2-7b-chat-hf"
+  output_model_name: "Llama-2-7b-jenkins-chat"
+
+  # LoRA Configuration
+  lora:
+    r: 16
+    alpha: 16
+    dropout: 0.05
+    target_modules:
+      - "q_proj"
+      - "k_proj"
+      - "v_proj"
+      - "o_proj"
+      - "gate_proj"
+
+  # Training Parameters
+  num_epochs: 5
+  batch_size: 4
+  learning_rate: 0.0002
+  warmup_ratio: 0.03
+  max_seq_length: 1024
+
+  # Quantization (for training)
+  use_4bit: true
+  bnb_4bit_quant_type: "nf4"
+
+# Model Conversion
+conversion:
+  quantization_type: "q8_0"  # Options: q4_0, q5_0, q5_1, q8_0
+  output_format: "gguf"
+
+# Paths
+paths:
+  raw_data: "../datasets/raw"
+  processed_data: "../datasets/processed"
+  training_data: "../datasets/training"
+  models: "../models"
+  logs: "./logs"
